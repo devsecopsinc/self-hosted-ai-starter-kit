@@ -1,0 +1,31 @@
+services:
+  nginx:
+    image: nginx:latest
+    hostname: nginx
+    container_name: nginx
+    restart: always
+    networks: ['demo']
+    ports:
+      - 0.0.0.0:80:80
+      - 0.0.0.0:443:443
+    volumes:
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./nginx/certs:/etc/nginx/certs:rw
+      - ./nginx/entrypoint.sh:/docker-entrypoint.d/99-create-certs.sh:ro
+    environment:
+      - VIRTUAL_HOST=${N8N_HOST}
+    depends_on: [n8n]
+  n8n:
+    environment:
+      - N8N_LOG_LEVEL=debug
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://${N8N_HOST}
+      - N8N_PROXY_HOPS=1
+  n8n-import:
+    environment:
+      - N8N_LOG_LEVEL=debug
+      - N8N_HOST=${N8N_HOST}
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://${N8N_HOST}
+      - N8N_PROXY_HOPS=1
